@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Discord Mini Chat</title>
+    <style>
+        body { margin: 0; padding-bottom: 3rem; font-family: sans-serif; }
+        #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+        #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
+        #input:focus { outline: none; }
+        #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+        #messages { list-style-type: none; margin: 0; padding: 0; }
+        #messages > li { padding: 0.5rem 1rem; }
+        #messages > li:nth-child(odd) { background: #eee; }
+    </style>
+</head>
+<body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <input id="input" autocomplete="off" placeholder="Tulis pesan..." /><button>Kirim</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script> 
+    
+    <script>
+        // 1. Inisialisasi Koneksi Socket.IO
+        // socket.io.js secara otomatis tersedia di path ini oleh server Socket.IO
+        const socket = io();
+
+        // 2. Ambil elemen DOM
+        const form = document.getElementById('form');
+        const input = document.getElementById('input');
+        const messages = document.getElementById('messages');
+
+        // 3. Logika Mengirim Pesan
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Mencegah halaman reload
+            if (input.value) {
+                // Mengirim event 'chat message' ke server dengan isi input
+                socket.emit('chat message', input.value);
+                input.value = ''; // Kosongkan input setelah dikirim
+            }
+        });
+
+        // 4. Logika Menerima Pesan
+        // Mendengarkan event 'chat message' dari server
+        socket.on('chat message', function(msg) {
+            // Membuat elemen list baru (li)
+            const item = document.createElement('li');
+            // Mengisi list dengan pesan
+            item.textContent = msg; 
+            // Menambahkan list ke daftar pesan (ul)
+            messages.appendChild(item);
+            // Scroll ke bawah agar pesan terbaru terlihat
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+</body>
+</html>
